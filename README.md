@@ -1,9 +1,20 @@
 # BHAJAN SANGAM
 
-Starter Android app project. GitHub Actions builds a debug APK when pushed to `main`.
+## Automatically listed offline songs
+
+Put audio files into:
+
+`app/src/main/assets/songs/`
+
+Supported formats: MP3, M4A, AAC, WAV, OGG and FLAC.
+
+When you run a new GitHub Actions build, Gradle scans that folder and automatically generates `app/src/main/assets/song-list.json`. The app reads that catalogue and displays every included song. You do not need to edit `index.html` when adding songs.
+
+Song names are generated from filenames:
+- `mero_bhajan.mp3` appears as `mero bhajan`
+- `krishna-aarti.m4a` appears as `krishna aarti`
+
+The audio files are packaged into the APK and can play without internet. Adding more songs increases APK size.
 
 ## Build
-Open the Actions tab in GitHub, run **Build Bhajan Sangam APK**, then download the `Bhajan-Sangam-APK` artifact from the completed workflow run.
-
-## Important
-This is a first offline-capable prototype. Audio selected in the Upload form is local to the current app session/device and is not shared with other users. Public uploads, accounts, moderation/admin approval, and permanent offline downloads require a backend/storage service and are not included yet.
+Push the updated project to GitHub or run the included GitHub Actions workflow.
