@@ -45,7 +45,7 @@ tasks.register('generateOfflineSongCatalog') {
                     def relativePath = songsFolder.toPath().relativize(f.toPath()).toString().replace('\\\\', '/')
                     def rawTitle = f.name.replaceFirst(/(?i)\.[^.]+$/, '')
                     def title = rawTitle.replace('_', ' ').replace('-', ' ').trim()
-                    songs << [title: title, file: "songs/${relativePath}"]
+                    songs << [title: title, file: "file:///android_asset/songs/${relativePath}"]
                 }
             }
         }
