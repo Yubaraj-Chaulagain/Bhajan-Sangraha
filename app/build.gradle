@@ -24,3 +24,39 @@ android {
         jvmTarget = '17'
     }
 }
+
+
+// Automatically create a catalogue of every audio file placed in app/src/main/assets/songs.
+// Add/remove MP3, M4A, AAC, WAV, OGG or FLAC files and build again; no HTML editing is needed.
+tasks.register('generateOfflineSongCatalog') {
+    def songsFolder = file('src/main/assets/songs')
+    def catalogFile = file('src/main/assets/song-list.json')
+
+    inputs.dir(songsFolder)
+    outputs.file(catalogFile)
+
+    doLast {
+        def supportedExtensions = ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'flac']
+        def songs = []
+
+        if (songsFolder.exists()) {
+            songsFolder.eachFileRecurse { f ->
+                if (f.isFile() && supportedExtensions.contains(f.name.tokenize('.').last().toLowerCase())) {
+                    def relativePath = songsFolder.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+                    def rawTitle = f.name.replaceFirst(/(?i)\\.[^.]+$/, '')
+                    def title = rawTitle.replace('_', ' ').replace('-', ' ').trim()
+                    songs << [title: title, file: "songs/${relativePath}"]
+                }
+            }
+        }
+
+        songs.sort { a, b -> a.title.toLowerCase() <=> b.title.toLowerCase() }
+        catalogFile.parentFile.mkdirs()
+        catalogFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(songs))
+        println("Generated offline song catalogue with ${songs.size()} song(s).")
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn tasks.named('generateOfflineSongCatalog')
+}
