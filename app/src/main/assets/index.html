@@ -49,15 +49,25 @@ audio{width:100%;margin-top:12px}
 <script src="song-list.js"></script>
 <script>
 const player = document.getElementById('player');
+player.addEventListener('error', () => {
+  document.getElementById('status').textContent = 'गीत फाइल खुल्न सकेन। नयाँ APK मा songs फोल्डरको MP3 समावेश छ कि जाँच गर्नुहोस्।';
+});
+player.addEventListener('playing', () => {
+  document.getElementById('status').textContent = 'गीत बजिरहेको छ।';
+});
 
 function playSong(title, file) {
   document.getElementById('now').textContent = title;
   document.getElementById('status').textContent = 'Offline गीत बजिरहेको छ।';
+  player.pause();
   player.src = file;
   player.load();
-  player.play().catch(() => {
-    document.getElementById('status').textContent = 'गीत बजाउन Play थिच्नुहोस्।';
-  });
+  const playPromise = player.play();
+  if (playPromise && typeof playPromise.catch === 'function') {
+    playPromise.catch(() => {
+      document.getElementById('status').textContent = 'गीत सुरु भएन। तलको Audio Player मा Play थिच्नुहोस्।';
+    });
+  }
 }
 
 function loadOfflineSongs() {
