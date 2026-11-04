@@ -46,6 +46,7 @@ audio{width:100%;margin-top:12px}
     <p class="muted">GitHub Repository को लिंक जडान भएपछि Online गीतहरू पनि यहाँ देखिनेछन्।</p>
   </div>
 </main>
+<script src="song-list.js"></script>
 <script>
 const player = document.getElementById('player');
 
@@ -61,49 +62,32 @@ function playSong(title, file) {
 
 function loadOfflineSongs() {
   const list = document.getElementById('songList');
-  const request = new XMLHttpRequest();
-  request.open('GET', 'song-list.json', true);
-  request.onload = function() {
-    if (request.status >= 200 && request.status < 300) {
-      try {
-        const songs = JSON.parse(request.responseText);
-        list.innerHTML = '';
-        if (!songs.length) {
-          list.innerHTML = '<div class="card empty">अहिलेसम्म गीत राखिएको छैन। songs फोल्डरमा Audio राख्नुहोस्।</div>';
-          return;
-        }
-        songs.forEach(song => {
-          const card = document.createElement('div');
-          card.className = 'card song';
-          const info = document.createElement('div');
-          const title = document.createElement('b');
-          title.textContent = song.title;
-          const sub = document.createElement('small');
-          sub.textContent = song.file.split('/').pop();
-          const badge = document.createElement('span');
-          badge.className = 'badge';
-          badge.textContent = 'Offline उपलब्ध';
-          info.append(title, sub, badge);
+  const songs = window.OFFLINE_SONGS || [];
+  list.innerHTML = '';
+  if (!songs.length) {
+    list.innerHTML = '<div class="card empty">अहिलेसम्म गीत राखिएको छैन। songs फोल्डरमा Audio राखेर फेरि Build गर्नुहोस्।</div>';
+    return;
+  }
+  songs.forEach(song => {
+    const card = document.createElement('div');
+    card.className = 'card song';
+    const info = document.createElement('div');
+    const title = document.createElement('b');
+    title.textContent = song.title;
+    const sub = document.createElement('small');
+    sub.textContent = song.file.split('/').pop();
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = 'Offline उपलब्ध';
+    info.append(title, sub, badge);
 
-          const button = document.createElement('button');
-          button.textContent = 'Play';
-          button.addEventListener('click', () => playSong(song.title, song.file));
-          card.append(info, button);
-          list.append(card);
-        });
-      } catch (e) {
-        list.innerHTML = '<div class="card empty">गीत सूची पढ्न सकिएन। फेरि Build गर्नुहोस्।</div>';
-      }
-    } else {
-      list.innerHTML = '<div class="card empty">गीत सूची भेटिएन। APK फेरि Build गर्नुहोस्।</div>';
-    }
-  };
-  request.onerror = function() {
-    list.innerHTML = '<div class="card empty">गीत सूची लोड भएन। APK फेरि Build गर्नुहोस्।</div>';
-  };
-  request.send();
+    const button = document.createElement('button');
+    button.textContent = 'Play';
+    button.addEventListener('click', () => playSong(song.title, song.file));
+    card.append(info, button);
+    list.append(card);
+  });
 }
-
 loadOfflineSongs();
 </script>
 </body>
