@@ -26,11 +26,11 @@ android {
 }
 
 
-// Automatically create a catalogue of every audio file placed in app/src/main/assets/songs.
-// Add/remove MP3, M4A, AAC, WAV, OGG or FLAC files and build again; no HTML editing is needed.
+// Automatically create a JavaScript catalogue of every bundled audio file.
+// A script tag loads this file reliably in Android WebView's local asset mode.
 tasks.register('generateOfflineSongCatalog') {
     def songsFolder = file('src/main/assets/songs')
-    def catalogFile = file('src/main/assets/song-list.json')
+    def catalogFile = file('src/main/assets/song-list.js')
 
     inputs.dir(songsFolder)
     outputs.file(catalogFile)
@@ -42,8 +42,8 @@ tasks.register('generateOfflineSongCatalog') {
         if (songsFolder.exists()) {
             songsFolder.eachFileRecurse { f ->
                 if (f.isFile() && supportedExtensions.contains(f.name.tokenize('.').last().toLowerCase())) {
-                    def relativePath = songsFolder.toPath().relativize(f.toPath()).toString().replace('\\', '/')
-                    def rawTitle = f.name.replaceFirst(/(?i)\\.[^.]+$/, '')
+                    def relativePath = songsFolder.toPath().relativize(f.toPath()).toString().replace('\\\\', '/')
+                    def rawTitle = f.name.replaceFirst(/(?i)\.[^.]+$/, '')
                     def title = rawTitle.replace('_', ' ').replace('-', ' ').trim()
                     songs << [title: title, file: "songs/${relativePath}"]
                 }
@@ -52,7 +52,7 @@ tasks.register('generateOfflineSongCatalog') {
 
         songs.sort { a, b -> a.title.toLowerCase() <=> b.title.toLowerCase() }
         catalogFile.parentFile.mkdirs()
-        catalogFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(songs))
+        catalogFile.text = "window.OFFLINE_SONGS = " + groovy.json.JsonOutput.toJson(songs) + ";"
         println("Generated offline song catalogue with ${songs.size()} song(s).")
     }
 }
